@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import re
 import sys
-import imp
 import time
 import json
 import decimal
@@ -475,14 +474,12 @@ class CBinDiff:
 
     try:
       log(f"Loading project specific Python script {self.project_script}")
-      module = imp.load_source("diaphora_hooks", self.project_script)
+      spec = importlib.util.spec_from_file_location("diaphora_hooks", self.project_script)
+      module = importlib.util.module_from_spec(spec)
+      spec.loader.exec_module(module)
     except:
       err = str(sys.exc_info()[1])
       print(f"Error loading project specific Python script: {err}")
-      return False
-
-    if module is None:
-      # How can it be?
       return False
 
     keys = dir(module)
